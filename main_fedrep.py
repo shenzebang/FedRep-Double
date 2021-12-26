@@ -19,7 +19,7 @@ from utils.options import args_parser
 from utils.train_utils import get_data, get_model, read_data
 from models.Update import LocalUpdate
 from models.test import test_img_local_all
-
+from tqdm import tqdm
 import time
 
 if __name__ == '__main__':
@@ -122,18 +122,34 @@ if __name__ == '__main__':
     accs10 = 0
     accs10_glob = 0
     start = time.time()
+    simulated_running_time = np.random.exponential(1, args.num_users)
+    double_c = args.double_freq
+    m = args.init_clients
+    running_time_record = []
+    running_time_all = 0
     for iter in range(args.epochs+1):
         w_glob = {}
         loss_locals = []
-        m = max(int(args.frac * args.num_users), 1)
-        if iter == args.epochs:
-            m = args.num_users
 
-        idxs_users = np.random.choice(range(args.num_users), m, replace=False)
+        m = min(m * 2, int(args.num_users * args.frac)) if double_c == 0 else m
+        double_c = args.double_freq if double_c == 0 else double_c - 1
+
+        if args.resample:
+            # generate samples from expotential distribution
+            simulated_running_time = np.random.exponential(1, args.num_users)
+        running_time_ordering = np.argsort(simulated_running_time)
+        idxs_users = running_time_ordering[:m]
+        running_time_all += np.sort(simulated_running_time)[m-1]
+        running_time_record.append(running_time_all)
+
+        if iter == args.epochs: # last epoch is for fine tuning
+            m = args.num_users
+            idxs_users = np.random.choice(range(args.num_users), m, replace=False)
+
         w_keys_epoch = w_glob_keys
         times_in = []
         total_len=0
-        for ind, idx in enumerate(idxs_users):
+        for ind, idx in tqdm(enumerate(idxs_users)):
             start_in = time.time()
             if 'femnist' in args.dataset or 'sent140' in args.dataset:
                 if args.epochs == iter:
@@ -230,8 +246,9 @@ if __name__ == '__main__':
     print(end-start)
     print(times)
     print(accs)
-    base_dir = './save/accs_' + args.alg + '_' +  args.dataset + str(args.num_users) +'_'+ str(args.shard_per_user) + '.csv'
+    base_dir = f"./save/result-{args.dataset}-{args.shard_per_user}-{args.num_users}-{args.description}-{args.repeat_id}.csv"
     user_save_path = base_dir
     accs = np.array(accs)
-    accs = pd.DataFrame(accs, columns=['accs'])
+    times = np.array(running_time_record)
+    accs = pd.DataFrame(np.stack([times, accs], axis=1), columns=['times', 'accs'])
     accs.to_csv(base_dir, index=False)

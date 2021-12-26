@@ -47,6 +47,10 @@ def args_parser():
     parser.add_argument('--bs_frac_in', type=float, default='0.8', help='PerFedAvg fraction of batch used for inner update')
     parser.add_argument('--lam_ditto', type=float, default='1', help='Ditto parameter lambda')
 
+    parser.add_argument('--init_clients', type=int, default=10, help="the number of clients participate initially")
+    parser.add_argument('--resample', action='store_true', help="whether to resample the speed of clients")
+    parser.add_argument('--double_freq', type=int, default=10, help="how often to double the participated clients")
+
     # other arguments
     parser.add_argument('--dataset', type=str, default='mnist', help="name of dataset")
     parser.add_argument('--iid', action='store_true', help='whether i.i.d or not')
@@ -58,6 +62,9 @@ def args_parser():
     parser.add_argument('--load_fed', type=str, default='n', help='define pretrained federated model path')
     parser.add_argument('--results_save', type=str, default='runA', help='define fed results save folder')
     parser.add_argument('--save_every', type=int, default=50, help='how often to save models')
+
+    parser.add_argument('--description', type=str, default='None', help='describe the setting')
+    parser.add_argument('--repeat_id', type=int, default=0, help='the repeat id of the run')
 
     args = parser.parse_args()
     return args

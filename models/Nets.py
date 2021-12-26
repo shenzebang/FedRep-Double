@@ -69,6 +69,7 @@ class CNNCifar(nn.Module):
         self.fc2 = nn.Linear(120, 64)
         self.fc3 = nn.Linear(64, args.num_classes)
         self.cls = args.num_classes
+        # self.drop = nn.Dropout(0.6)
 
         self.weight_keys = [['fc1.weight', 'fc1.bias'],
                             ['fc2.weight', 'fc2.bias'],
@@ -83,7 +84,8 @@ class CNNCifar(nn.Module):
         x = x.view(-1, 64 * 5 * 5)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.drop(self.fc3(x))
+        # x = self.drop(self.fc3(x))
+        x = self.fc3(x)
         return F.log_softmax(x, dim=1)
 
 class CNNCifar100(nn.Module):

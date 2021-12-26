@@ -105,7 +105,7 @@ def test_img_local_all(net, args, dataset_test, dict_users_test,w_locals=None,w_
     acc_test_local = np.zeros(num_idxxs)
     loss_test_local = np.zeros(num_idxxs)
     for idx in range(num_idxxs):
-	net_local = copy.deepcopy(net)
+        net_local = copy.deepcopy(net)
         if w_locals is not None:
             w_local = net_local.state_dict()
             for k in w_locals[idx].keys():
