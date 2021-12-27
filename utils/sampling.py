@@ -7,7 +7,7 @@ import random
 import numpy as np
 import torch
 
-def noniid(dataset, num_users, shard_per_user, num_classes, rand_set_all=[]):
+def noniid(dataset, num_users, shard_per_user, num_classes, rand_set_all=[], testb=False):
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
